@@ -101,5 +101,6 @@ public class ReprTest {
         } else {
             System.out.println("All tests for the toString method for the prefix representation passed.");
         }
+
     }
 }

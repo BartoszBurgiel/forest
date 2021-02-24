@@ -31,6 +31,7 @@ public class Representation {
 
         // check if the representation is valid with regex
         if (!representation.matches("(pos|pre|inf)=([a-zA-Z0-9]+|[\\+\\-\\/\\*])(,([a-zA-Z0-9]+|[\\+\\-\\/\\*]))*$")) {
+            System.out.println("false representation syntax: "+representation);
             return;
         }
 
@@ -145,8 +146,8 @@ public class Representation {
             if (this.content[i].equals(this.node)) {
                 format = "[%s], ";
 
-                // if the type is POSTFIX, set another format 
-                // -> the last element is the node 
+                // if the type is POSTFIX, set another format
+                // -> the last element is the node
                 if (this.type == RepresentationType.POSTFIX) {
                     format = "[%s]";
                 }
@@ -164,6 +165,46 @@ public class Representation {
     // get the node
     public String getNode() {
         return this.node;
+    }
+
+    // getNode of the given infix subtree
+    // based on the contents of this' tree
+    // -> return the frontest/rearest element
+    // in this' content
+    public String getNode(Representation infixSubtree) {
+
+        // for the PREFIX return the frontest element
+        if (this.type == RepresentationType.PREFIX) {
+
+            // iterate over this' contents untill an element
+            // from the infixSubtree is found
+            for (int i = 0; i < this.content.length; i++) {
+
+                // iterate over infixSubtree elements and check
+                // if the current element exists in the array
+                for (int j = 0; j < infixSubtree.getContent().length; j++) {
+                    if (this.content[i].equals(infixSubtree.getContent()[j])) {
+                        return this.content[i];
+                    }
+                }
+            }
+        } else if (this.type == RepresentationType.POSTFIX) {
+
+            // iterate over this' contents untill an element
+            // from the infixSubtree is found
+            for (int i = this.content.length - 1; i >= 0; i--) {
+
+                // iterate over infixSubtree elements and check
+                // if the current element exists in the array
+                for (int j = 0; j < infixSubtree.getContent().length; j++) {
+                    if (this.content[i].equals(infixSubtree.getContent()[j])) {
+                        return this.content[i];
+                    }
+                }
+            }
+        }
+
+        return "was";
     }
 
     public String[] getContent() {
@@ -229,12 +270,61 @@ public class Representation {
         return new String[0];
     }
 
-    public String getLeftTree() {
+    public Representation getLeftTree() {
+        String out = "";
+        // add the representation name
+        switch (this.type) {
+            case INFIX:
+                out += "inf=";
+                break;
+            case POSTFIX:
+                out += "pos=";
+                break;
+            case PREFIX:
+                out += "pre=";
+        }
+        out += this.getLeftTreeString();
+        return new Representation(out);
+    }
+
+    public Representation getRightTree() {
+        String out = "";
+        // add the representation name
+        switch (this.type) {
+            case INFIX:
+                out += "inf=";
+                break;
+            case POSTFIX:
+                out += "pos=";
+                break;
+            case PREFIX:
+                out += "pre=";
+        }
+        out += this.getRightTreeString();
+        return new Representation(out);
+    }
+
+
+    public String getLeftTreeString() {
         return String.join(", ", this.leftTree);
     }
 
-    public String getRightTree() {
+    public String getRightTreeString() {
         return String.join(", ", this.rightTree);
+    }
+
+    public boolean hasRightTree() {
+        return this.rightTree.length != 0;
+    }
+
+    public boolean hasLeftTree() {
+        return this.leftTree.length != 0;
+    }
+
+    // return if the representation doesn't have 
+    // any elements in it
+    public boolean isEmpty() {
+        return (this.content.length == 0); 
     }
 
     // setter
