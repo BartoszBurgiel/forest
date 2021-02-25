@@ -16,6 +16,8 @@ public class Tree {
 
     // map to store all nodes of the tree
     // as a map for easier and faster access
+    // key -> the content of the node
+    // value -> the tree reference
     private HashMap<String, Tree> nodeMap;
 
     // This tree constructor takes in two parameter, an infix representation (to
@@ -25,10 +27,10 @@ public class Tree {
 
         // initialize the hashmap with the needed capacity
         nodeMap = new HashMap<String, Tree>(rep.getContent().length);
-        
+
         // get the root of the tree
         this.content = rep.getNode(infix);
-        
+
         // put into the map
         this.nodeMap.put(this.content, this);
 
@@ -53,6 +55,31 @@ public class Tree {
             // set the left tree to the tree instance createf of
             // the information of the left tree's infix
             this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, this.nodeMap);
+        }
+
+
+        // check for duplicate positions
+        // and while the duplicates exist, rebuild the tree
+        // increasing the spead on the initial left and right trees
+        int spread = 1;
+        while (this.hasDuplicateCoordinates()) {
+           spread++;
+            // if the right tree exists
+            if (infix.hasRightTree()) {
+
+                // set the right tree to the tree instance created of
+                // the information of the right tree's infix
+                this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + spread, this.yPos + 1, this.nodeMap);
+            }
+
+            // if the left tree exists
+            if (infix.hasLeftTree()) {
+
+                // set the left tree to the tree instance createf of
+                // the information of the left tree's infix
+                this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - spread, this.yPos + 1, this.nodeMap);
+            }
+
         }
     }
 
@@ -99,20 +126,18 @@ public class Tree {
 
         // iterate over the keys
         for (Tree tree : this.nodeMap.values()) {
-            
+
             // set the maximum y value
             maxY = Integer.max(tree.yPos, maxY);
             maxX = Integer.max(tree.xPos, maxX);
             minX = Integer.min(tree.xPos, minX);
         }
 
-
         // the size of the matrix on the vertical axis is the
         // sum of abs(maxX) and abs(minX)
         // -> max spread to the right + max spread to the left
         int xSize = Math.abs(minX) + Math.abs(maxX);
         int ySize = maxY;
-
 
         // increase xSize and ySize by one
         // for the array creaction
@@ -130,11 +155,10 @@ public class Tree {
         // first y and then x due to the printing reason
         String[][] matrix = new String[ySize][xSize];
 
-
         // fill the matrix with the values from the nodeMap
         for (Tree tree : this.nodeMap.values()) {
 
-            matrix[tree.yPos * 2][tree.xPos+Math.abs(minX)] = tree.content;
+            matrix[tree.yPos * 2][tree.xPos + Math.abs(minX)] = tree.content;
         }
 
         // iterate over the matrix and print
@@ -178,17 +202,31 @@ public class Tree {
         return builder.toString();
     }
 
+    // hasDuplicateCoordinates checks if there exist tree nodes that
+    // would be allocated at the same position on the matrix
+    private boolean hasDuplicateCoordinates() {
+
+        // create a hashmap for the points
+        // key -> the coordinates of the node
+        // value -> dummy
+        HashMap<String, Boolean> pointMap = new HashMap<String, Boolean>();
+
+        // iterate over the elements of the nodeMap and
+        // add the coodrinates to the map
+        for (Tree node : this.nodeMap.values()) {
+
+            // convert the x and y coordinates to a string
+            String coordinates = String.format("%d|%d", node.xPos, node.yPos);
+
+            // check if the coorinates are already in the map
+            if (pointMap.containsKey(coordinates)) {
+
+                // there exist duplicate coordinates
+                // -> return true
+                return true;
+            }
+            pointMap.put(coordinates, true);
+        }
+        return false;
+    }
 }
-
-/*
-
--5; 2 
-abs = 7 
-
-in -5 => 0 
-in 2 => 7 
-
-
-
-
-*/
