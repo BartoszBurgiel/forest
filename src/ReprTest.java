@@ -13,7 +13,13 @@ public class ReprTest {
                 "inf=(1, 2, 3, 4, 5, 6, 7, 8), [9]", };
 
         // create an infix representation for the test
-        Representation infixRepr = new Representation(infixTest);
+        Representation infixRepr = null;
+        try {
+
+            infixRepr = new Representation(infixTest);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
 
         String infixReprNodeTestResult = "";
         // iterate over 0 to 9 and compare the want string with the have string
@@ -48,7 +54,13 @@ public class ReprTest {
         String postfixTestToStringWant = "pos=1, 2, 3, 4, 5, 6, 7, 8, [9]";
 
         // create an postfix representation for the test
-        Representation postfixRepr = new Representation(postfixTest);
+        Representation postfixRepr = null;
+        try {
+
+            postfixRepr = new Representation(postfixTest);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
 
         String postfixReprNodeTestResult = "";
 
@@ -79,7 +91,13 @@ public class ReprTest {
         String prefixTestToStringWant = "pre=[1], 2, 3, 4, 5, 6, 7, 8, 9";
 
         // create an prefix representation for the test
-        Representation prefixRepr = new Representation(prefixTest);
+        Representation prefixRepr = null;
+        try {
+
+            prefixRepr = new Representation(prefixTest);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
 
         String prefixReprNodeTestResult = "";
 

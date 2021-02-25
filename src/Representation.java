@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 // Representation of a tree in a certain notation: 
 // "postfix: 3,0,4,8,5,8,1,6,9"
@@ -21,7 +22,7 @@ public class Representation {
     // "postfix: 3,0,4,8,5,8,1,6,9"
     //
     // this constructor proves if the passed string is valid
-    public Representation(String representation) {
+    public Representation(String representation) throws Exception {
 
         this.leftTree = new String[0];
         this.rightTree = new String[0];
@@ -31,8 +32,7 @@ public class Representation {
 
         // check if the representation is valid with regex
         if (!representation.matches("(pos|pre|inf)=([a-zA-Z0-9]+|[\\+\\-\\/\\*])(,([a-zA-Z0-9]+|[\\+\\-\\/\\*]))*$")) {
-            System.out.println("false representation syntax: "+representation);
-            return;
+            throw new Exception("False representation syntax: " + representation);
         }
 
         // determine and set the representation type
@@ -57,6 +57,41 @@ public class Representation {
 
         // split the representation string by the commata and assemble the content
         this.content = representation.split(",");
+
+        // search for duplicates within the content
+        // create a hashmap for the elements
+        HashMap<String, Boolean> contentHashMap = new HashMap<String, Boolean>(this.content.length);
+        for (String s : content) {
+
+            // check if the element exists in the map
+            if (contentHashMap.containsKey(s)) {
+                throw new Exception("No duplicates allowed within a representation: " + s + " occurs at least twice.");
+            }
+            contentHashMap.put(s, true);
+        }
+
+        // clear the map
+        contentHashMap.clear();
+
+        // determine the node (if possible)
+        // if POSTFIX -> last char
+        if (this.type == RepresentationType.POSTFIX) {
+            this.node = this.content[this.content.length - 1];
+        }
+
+        // if PREFIX -> first char
+        if (this.type == RepresentationType.PREFIX) {
+            this.node = this.content[0];
+        }
+
+        // collect the tree information from the content
+        this.setNode(this.node);
+    }
+
+    // private representation constructor for the assembly of subtrees
+    private Representation(RepresentationType type, String[] content) {
+        this.type = type;
+        this.content = content;
 
         // determine the node (if possible)
         // if POSTFIX -> last char
@@ -204,7 +239,7 @@ public class Representation {
             }
         }
 
-        return "was";
+        return "";
     }
 
     public String[] getContent() {
@@ -271,39 +306,12 @@ public class Representation {
     }
 
     public Representation getLeftTree() {
-        String out = "";
-        // add the representation name
-        switch (this.type) {
-            case INFIX:
-                out += "inf=";
-                break;
-            case POSTFIX:
-                out += "pos=";
-                break;
-            case PREFIX:
-                out += "pre=";
-        }
-        out += this.getLeftTreeString();
-        return new Representation(out);
+        return new Representation(this.type, this.getLeftTreeString().replaceAll(" ", "").split(","));
     }
 
     public Representation getRightTree() {
-        String out = "";
-        // add the representation name
-        switch (this.type) {
-            case INFIX:
-                out += "inf=";
-                break;
-            case POSTFIX:
-                out += "pos=";
-                break;
-            case PREFIX:
-                out += "pre=";
-        }
-        out += this.getRightTreeString();
-        return new Representation(out);
+        return new Representation(this.type, this.getRightTreeString().replaceAll(" ", "").split(","));
     }
-
 
     public String getLeftTreeString() {
         return String.join(", ", this.leftTree);
@@ -321,10 +329,10 @@ public class Representation {
         return this.leftTree.length != 0;
     }
 
-    // return if the representation doesn't have 
+    // return if the representation doesn't have
     // any elements in it
     public boolean isEmpty() {
-        return (this.content.length == 0); 
+        return (this.content.length == 0);
     }
 
     // setter
