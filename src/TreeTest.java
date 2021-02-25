@@ -7,7 +7,7 @@ public class TreeTest {
 
         // create a tree
         Tree t = new Tree(infix, postfix);
-        String want = "       8    \n    /     \\ \n    2     3 \n /     \\    \n 6     4    \n    \\     \\ \n    9     1 \n /     \\    \n 5     7    \n            \n";
+        String want = "      (8)   \n    /     \\ \n   (2)   (3)\n /     \\    \n(6)   (4)   \n    \\     \\ \n   (9)   (1)\n /     \\    \n(5)   (7)   \n            \n";
 
         System.out.println(want.equals(t.toString()) ? "passed" : "didnt pass :c");
 
@@ -17,7 +17,7 @@ public class TreeTest {
 
         // create a tree
         t = new Tree(infix, postfix);
-        want = "    4             \n /     \\          \n 7     2          \n    \\     \\       \n    3     6       \n       /     \\    \n       1     5    \n                \\ \n                8 \n                  \n";
+        want = "   (4)            \n /     \\          \n(7)   (2)         \n    \\     \\       \n   (3)   (6)      \n       /     \\    \n      (1)   (5)   \n                \\ \n               (8)\n                  \n";
         System.out.println(want.equals(t.toString()) ? "passed" : "didnt pass :c");
 
         // define the postfix and infix representations
@@ -26,7 +26,7 @@ public class TreeTest {
 
         // create a tree
         t = new Tree(infix, postfix);
-        want = "    9          \n /     \\       \n 6     5       \n    /     \\    \n    3     8    \n       /     \\ \n       4     7 \n          \\    \n          2    \n               \n";
+        want = "   (9)         \n /     \\       \n(6)   (5)      \n    /     \\    \n   (3)   (8)   \n       /     \\ \n      (4)   (7)\n          \\    \n         (2)   \n               \n";
         System.out.println(want.equals(t.toString()) ? "passed" : "didnt pass :c");
 
         // define the postfix and infix representations
@@ -35,8 +35,18 @@ public class TreeTest {
 
         // create a tree
         t = new Tree(infix, postfix);
-        want = "    1    \n /     \\ \n 3     7 \n    /    \n    9    \n /     \\ \n 5     6 \n         \n    8    \n         \n";
+        want = "   (1)   \n /     \\ \n(3)   (7)\n    /    \n   (9)   \n /     \\ \n(5)   (6)\n         \n   (8)   \n         \n";
         System.out.println(want.equals(t.toString()) ? "passed" : "didnt pass :c");
+
+        // define the postfix and infix representations
+        postfix = new Representation("pos=a,b,*,c,d,/,+");
+        infix = new Representation("inf=a,*,b,+,c,/,d");
+
+        // create a tree
+        t = new Tree(infix, postfix);
+        want = "   (1)   \n /     \\ \n(3)   (7)\n    /    \n   (9)   \n /     \\ \n(5)   (6)\n         \n   (8)   \n         \n";
+        System.out.println(t.toString());
+
 
     }
 }

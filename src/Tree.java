@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+import java.util.HashMap;
 
 // Tree represents a binary tree
 public class Tree {
@@ -14,20 +14,23 @@ public class Tree {
     private int xPos;
     private int yPos;
 
-    // list to store all nodes of the tree
-    // as a list for easier access
-    private ArrayList<Tree> nodeList;
+    // map to store all nodes of the tree
+    // as a map for easier and faster access
+    private HashMap<String, Tree> nodeMap;
 
     // This tree constructor takes in two parameter, an infix representation (to
     // determine the left and right subtrees)
     // and one other representation to determine the root
     public Tree(Representation infix, Representation rep) {
 
-        nodeList = new ArrayList<Tree>();
-        this.nodeList.add(this);
-
+        // initialize the hashmap with the needed capacity
+        nodeMap = new HashMap<String, Tree>(rep.getContent().length);
+        
         // get the root of the tree
         this.content = rep.getNode(infix);
+        
+        // put into the map
+        this.nodeMap.put(this.content, this);
 
         // set the coordinates
         this.xPos = 0;
@@ -41,7 +44,7 @@ public class Tree {
 
             // set the right tree to the tree instance created of
             // the information of the right tree's infix
-            this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + 1, this.yPos + 1, this.nodeList);
+            this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + 1, this.yPos + 1, this.nodeMap);
         }
 
         // if the left tree exists
@@ -49,13 +52,13 @@ public class Tree {
 
             // set the left tree to the tree instance createf of
             // the information of the left tree's infix
-            this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, this.nodeList);
+            this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, this.nodeMap);
         }
     }
 
     // private constructor for the recursive subtree generation
     // with the x and y coordinates
-    private Tree(Representation infix, Representation rep, int x, int y, ArrayList<Tree> nodeList) {
+    private Tree(Representation infix, Representation rep, int x, int y, HashMap<String, Tree> nodeMap) {
         // get the root of the tree
         this.content = rep.getNode(infix);
 
@@ -71,7 +74,7 @@ public class Tree {
 
             // set the right tree to the tree instance created of
             // the information of the right tree's infix
-            this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + 1, this.yPos + 1, nodeList);
+            this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + 1, this.yPos + 1, nodeMap);
         }
 
         // if the left tree exists
@@ -79,9 +82,11 @@ public class Tree {
 
             // set the left tree to the tree instance createf of
             // the information of the left tree's infix
-            this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, nodeList);
+            this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, nodeMap);
         }
-        nodeList.add(this);
+
+        // put the node into the map
+        nodeMap.put(this.content, this);
     }
 
     public String toString() {
@@ -91,8 +96,10 @@ public class Tree {
         int maxY = 0;
         int maxX = 0;
         int minX = 0;
-        for (Tree tree : this.nodeList) {
 
+        // iterate over the keys
+        for (Tree tree : this.nodeMap.values()) {
+            
             // set the maximum y value
             maxY = Integer.max(tree.yPos, maxY);
             maxX = Integer.max(tree.xPos, maxX);
@@ -124,8 +131,8 @@ public class Tree {
         String[][] matrix = new String[ySize][xSize];
 
 
-        // fill the matrix with the values from the nodeList
-        for (Tree tree : this.nodeList) {
+        // fill the matrix with the values from the nodeMap
+        for (Tree tree : this.nodeMap.values()) {
 
             matrix[tree.yPos * 2][tree.xPos+Math.abs(minX)] = tree.content;
         }
@@ -134,16 +141,11 @@ public class Tree {
         for (int i = 0; i < matrix.length; i += 2) {
             for (int j = 0; j < matrix[i].length; j++) {
 
+                // if the element of the matrix is defined
                 if (matrix[i][j] != null) {
-                    // get the current node
-                    Tree currentNode = this.nodeList.get(0);
 
-                    // search the nodeList for this node
-                    for (Tree node : this.nodeList) {
-                        if (matrix[i][j].equals(node.content)) {
-                            currentNode = node;
-                        }
-                    }
+                    // get the current node
+                    Tree currentNode = this.nodeMap.get(matrix[i][j]);
 
                     // check if subtrees of the current node exist
                     if (currentNode.leftTree != null) {
@@ -161,7 +163,7 @@ public class Tree {
 
                     }
 
-                    matrix[i][j] = String.format(" %s ", matrix[i][j]);
+                    matrix[i][j] = String.format("(%s)", matrix[i][j]);
                 }
             }
         }
@@ -169,6 +171,8 @@ public class Tree {
         // join the matrix to string
         StringBuilder builder = new StringBuilder();
         for (String[] row : matrix) {
+
+            // replace all nulls with blank space
             builder.append(String.join("", row).replaceAll("null", "   ") + "\n");
         }
         return builder.toString();
