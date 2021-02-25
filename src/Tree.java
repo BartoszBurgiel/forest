@@ -57,13 +57,12 @@ public class Tree {
             this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, this.nodeMap);
         }
 
-
         // check for duplicate positions
         // and while the duplicates exist, rebuild the tree
         // increasing the spead on the initial left and right trees
         int spread = 1;
         while (this.hasDuplicateCoordinates()) {
-           spread++;
+            spread++;
             // if the right tree exists
             if (infix.hasRightTree()) {
 
@@ -228,5 +227,64 @@ public class Tree {
             pointMap.put(coordinates, true);
         }
         return false;
+    }
+
+    // conversion functions to convert a tree
+    // into the infix, postfix, and prefix notations
+    public String toInfix() {
+        String out = "";
+
+        // if left tree exists
+        if (this.leftTree != null) {
+            out += this.leftTree.toInfix();
+        }
+
+        // add the content
+        out += this.content;
+
+        // if the right tree exists 
+        if (this.rightTree != null) {
+            out += this.rightTree.toInfix();
+        }
+        
+        return out;
+    }
+
+    public String toPostfix() {
+        String out = "";
+
+        // if left tree exists
+        if (this.leftTree != null) {
+            out += this.leftTree.toPostfix();
+        }
+
+        // if the right tree exists 
+        if (this.rightTree != null) {
+            out += this.rightTree.toPostfix();
+        }
+
+        // add the content
+        out += this.content;
+        
+        return out;
+    }
+
+    public String toPrefix() {
+        String out = "";
+
+        // add the content
+        out += this.content;
+
+        // if left tree exists
+        if (this.leftTree != null) {
+            out += this.leftTree.toPrefix();
+        }
+
+        // if the right tree exists 
+        if (this.rightTree != null) {
+            out += this.rightTree.toPrefix();
+        }
+        
+        return out;
     }
 }
