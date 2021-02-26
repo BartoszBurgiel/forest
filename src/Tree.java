@@ -1,4 +1,6 @@
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // Tree represents a binary tree
 public class Tree {
@@ -20,10 +22,18 @@ public class Tree {
     // value -> the tree reference
     private HashMap<String, Tree> nodeMap;
 
+    // the original infix and rep representations
+    // for the funture tree expansion when turining to a string
+    private Representation infix, rep;
+
     // This tree constructor takes in two parameter, an infix representation (to
     // determine the left and right subtrees)
     // and one other representation to determine the root
     public Tree(Representation infix, Representation rep) {
+
+        // set the infix and rep
+        this.infix = infix;
+        this.rep = rep;
 
         // initialize the hashmap with the needed capacity
         nodeMap = new HashMap<String, Tree>(rep.getContent().length);
@@ -55,30 +65,6 @@ public class Tree {
             // set the left tree to the tree instance createf of
             // the information of the left tree's infix
             this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, this.nodeMap);
-        }
-
-        // check for duplicate positions
-        // and while the duplicates exist, rebuild the tree
-        // increasing the spead on the initial left and right trees
-        int spread = 1;
-        while (this.hasDuplicateCoordinates()) {
-            spread++;
-            // if the right tree exists
-            if (infix.hasRightTree()) {
-
-                // set the right tree to the tree instance created of
-                // the information of the right tree's infix
-                this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + spread, this.yPos + 1, this.nodeMap);
-            }
-
-            // if the left tree exists
-            if (infix.hasLeftTree()) {
-
-                // set the left tree to the tree instance createf of
-                // the information of the left tree's infix
-                this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - spread, this.yPos + 1, this.nodeMap);
-            }
-
         }
     }
 
@@ -117,13 +103,36 @@ public class Tree {
 
     public String toString() {
 
+        // check for duplicate positions
+        // and while the duplicates exist, rebuild the tree
+        // increasing the spead on the initial left and right trees
+        int spread = 1;
+        while (this.hasDuplicateCoordinates()) {
+            spread++;
+            // if the right tree exists
+            if (infix.hasRightTree()) {
+
+                // set the right tree to the tree instance created of
+                // the information of the right tree's infix
+                this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + spread, this.yPos + 1, this.nodeMap);
+            }
+
+            // if the left tree exists
+            if (infix.hasLeftTree()) {
+
+                // set the left tree to the tree instance createf of
+                // the information of the left tree's infix
+                this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - spread, this.yPos + 1, this.nodeMap);
+            }
+        }
+
         // variables to store the max
         // vertical and horizontal spead
         int maxY = 0;
         int maxX = 0;
         int minX = 0;
 
-        // iterate over the keys
+        // iterate over the values and find the max and min
         for (Tree tree : this.nodeMap.values()) {
 
             // set the maximum y value
@@ -231,22 +240,36 @@ public class Tree {
 
     // conversion functions to convert a tree
     // into the infix, postfix, and prefix notations
-    public String toInfix() {
+    //
+    // the brackets parameter tell if the brackets should
+    // be put around the subtrees
+    public String toInfix(boolean brackets) {
         String out = "";
 
         // if left tree exists
         if (this.leftTree != null) {
-            out += this.leftTree.toInfix();
+            out += this.leftTree.toInfix(brackets);
         }
 
         // add the content
         out += this.content;
 
-        // if the right tree exists 
+        // if the right tree exists
         if (this.rightTree != null) {
-            out += this.rightTree.toInfix();
+            out += this.rightTree.toInfix(brackets);
         }
-        
+
+        if (this.isLeaf()) {
+
+            // if is a leaf -> return out without brackets regardless
+            return out;
+        }
+
+        // if brackets -> enclose the subtree in brackets
+        if (brackets) {
+
+            return "(" + out + ")";
+        }
         return out;
     }
 
@@ -258,14 +281,14 @@ public class Tree {
             out += this.leftTree.toPostfix();
         }
 
-        // if the right tree exists 
+        // if the right tree exists
         if (this.rightTree != null) {
             out += this.rightTree.toPostfix();
         }
 
         // add the content
         out += this.content;
-        
+
         return out;
     }
 
@@ -280,11 +303,124 @@ public class Tree {
             out += this.leftTree.toPrefix();
         }
 
-        // if the right tree exists 
+        // if the right tree exists
         if (this.rightTree != null) {
             out += this.rightTree.toPrefix();
         }
-        
+
         return out;
+    }
+
+    // tell if the this is a leaf
+    public Boolean isLeaf() {
+        return (this.rightTree == null && this.leftTree == null);
+    }
+
+    // tell if this is a calculable mathematical expression
+    // -> all leaves are numerals
+    // -> all nodes are operators
+    public Boolean isMathExpression() {
+
+        // tell if all leafs are numerals and
+        // the nodes are mathematical operators
+        String operatorsRegex = "[\\+\\-\\/\\*]";
+        String numeralsRegex = "[0-9]+";
+
+        // iterate over all nodes
+        for (Tree node : this.nodeMap.values()) {
+
+            // if is a leaf
+            if (node.isLeaf()) {
+                // and is not a numeral
+                if (!node.content.matches(numeralsRegex)) {
+                    return false;
+                }
+            }
+
+            // if is a node
+            if (!node.isLeaf()) {
+                // and is not an operator
+                if (!node.content.matches(operatorsRegex)) {
+                    return false;
+                }
+            }
+
+        }
+        return true;
+    }
+
+    // calculate the value if the
+    // tree is an expression tree
+    public int calculate() {
+        if (!this.isMathExpression()) {
+            return -1;
+        }
+
+        // get the expression in infix
+        String expression = this.toInfix(true);
+
+        // the regex to match a mathematical expression
+        Pattern termsPattern = Pattern.compile("\\([0-9]+[\\+\\-\\/\\*][0-9]+\\)");
+        Matcher matcher = termsPattern.matcher(expression);
+
+
+        // replace the expressions untill only the solutions is left
+        // -> while the expression isn't like (<number>)
+        while (!expression.matches("[0-9]+")) {
+
+            // redefine the matcher with the new expression
+            matcher = termsPattern.matcher(expression);
+
+            // pick the expressions with regex and replace them with numbers
+            if (matcher.find()) {
+
+                // strip the match of the brackets
+                String match = matcher.group(0).replaceAll("\\(|\\)", "");
+
+                // prepare the match for the replacement
+                // -> replace dangerous characters: *, +, (, ) by \\+, \\* etc.
+                String toReplace = matcher.group(0).replaceAll("\\+", "\\\\+").replaceAll("\\*", "\\\\*")
+                        .replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)");
+
+                // replace the calculated value in the expression
+                expression = expression.replaceAll(toReplace, String.valueOf(calculateExpression(match)));
+            }
+        }
+
+        return Integer.valueOf(expression);
+    }
+
+    // calculate an expression of 2 numbers and an operator
+    // -> 3 + 4 or 5 / 3
+    public int calculateExpression(String expr) {
+
+        // regex to get the terms and operator in groupings
+        Pattern termsPattern = Pattern.compile("([0-9]+)([\\*\\+\\-\\/])([0-9]+)");
+        Matcher matcher = termsPattern.matcher(expr);
+
+        // get the terms
+
+        // first term -> 0;<expr[i]==operator>
+        if (matcher.matches()) {
+
+            int firstTerm = Integer.valueOf(matcher.group(1));
+            String operator = matcher.group(2);
+            int secondTerm = Integer.valueOf(matcher.group(3));
+
+            // choose the right operation and return the calculated result
+            switch (operator) {
+                case "+":
+                    return firstTerm + secondTerm;
+                case "-":
+                    return firstTerm - secondTerm;
+                case "/":
+                    return firstTerm / secondTerm;
+                case "*":
+                    return firstTerm * secondTerm;
+                default:
+                    return -1;
+            }
+        }
+        return -1;
     }
 }
