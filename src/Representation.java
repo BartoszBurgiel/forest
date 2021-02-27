@@ -58,12 +58,8 @@ public class Representation {
         // split the representation string by the commata and assemble the content
         this.content = representation.split(",");
 
-        try {
-            // check if there are any duplicates
-            findDuplicatesInContent(content);
-        } catch (Exception e) {
-            System.out.println(e.toString());
-        }
+        // check if there are any duplicates
+        findDuplicatesInContent(content);
 
         // determine the node (if possible)
         // if POSTFIX -> last char
@@ -83,12 +79,8 @@ public class Representation {
     // generate a representation with the contents of the contents string in a
     // randomized order of the given type
     public static String generateRandomRepresentation(String type, String[] content) throws Exception {
-        try {
-            // check if there are any duplicates
-            findDuplicatesInContent(content);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // check if there are any duplicates
+        findDuplicatesInContent(content);
 
         // creare a copy of the content
         // so that the original content doesn't get affected by the future element

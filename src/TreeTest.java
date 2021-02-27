@@ -211,7 +211,11 @@ public class TreeTest {
         System.out.println(t.informationToString());
 
         System.out.println("\n\nRandom tree");
-        t = new Tree(new String[] { "a", "b", "c", "d", "e", "f", "g" });
+        try {
+            t = new Tree(new String[] { "ab", "bc", "cd", "ded", "eew", "ffs", "gwe" });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         System.out.println(t.informationToString());
     }
 }

@@ -28,25 +28,15 @@ public class Tree {
 
     // this tree constructor creates a random tree with the
     // characters defined in the content
-    public Tree(String[] content) {
+    public Tree(String[] content) throws Exception {
 
         // generate two necessary representations
-        this.infix = null;
-        try {
-            this.infix = new Representation(Representation.generateRandomRepresentation("inf", content));
-        } catch (Exception e) {
-            System.out.println(e.toString());
-        }
-        this.rep = null;
-        try {
+        this.infix = new Representation(Representation.generateRandomRepresentation("inf", content));
 
-            // determine the representation type
-            String type = (Math.random() > 0.5) ? "pre" : "pos";
+        // determine the representation type
+        String type = (Math.random() > 0.5) ? "pre" : "pos";
 
-            this.rep = new Representation(Representation.generateRandomRepresentation(type, content));
-        } catch (Exception e) {
-            System.out.println(e.toString());
-        }
+        this.rep = new Representation(Representation.generateRandomRepresentation(type, content));
 
         // initialize the hashmap with the needed capacity
         this.nodeMap = new HashMap<String, Tree>(rep.getContent().length);
