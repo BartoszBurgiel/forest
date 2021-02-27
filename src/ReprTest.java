@@ -119,5 +119,21 @@ public class ReprTest {
         } else {
             System.out.println("All tests for the toString method for the prefix representation passed.");
         }
+
+        System.out.println("Generating a random representation");
+        // test generating random representations
+        String random = "";
+        Representation randomRepresentation = null;
+        try {
+            random = Representation.generateRandomRepresentation("pos", new String[] { "4", "5", "1", "3", "2" });
+        } catch (Exception e) {
+            System.out.println(e.toString() + "jejku");
+        }
+        try {
+            randomRepresentation = new Representation(random);
+        } catch (Exception e) {
+            System.out.println(e.toString() + "jezu no co");
+        }
+        System.out.println("does it work: " + randomRepresentation.toString());
     }
 }

@@ -26,6 +26,61 @@ public class Tree {
     // for the funture tree expansion when turining to a string
     private Representation infix, rep;
 
+    // this tree constructor creates a random tree with the
+    // characters defined in the content
+    public Tree(String[] content) {
+
+        // generate two necessary representations
+        this.infix = null;
+        try {
+            this.infix = new Representation(Representation.generateRandomRepresentation("inf", content));
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+        this.rep = null;
+        try {
+
+            // determine the representation type
+            String type = (Math.random() > 0.5) ? "pre" : "pos";
+
+            this.rep = new Representation(Representation.generateRandomRepresentation(type, content));
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+
+        // initialize the hashmap with the needed capacity
+        this.nodeMap = new HashMap<String, Tree>(rep.getContent().length);
+
+        // get the root of the tree
+        this.content = rep.getNode(infix);
+
+        // put into the map
+        this.nodeMap.put(this.content, this);
+
+        // set the coordinates
+        this.xPos = 0;
+        this.yPos = 0;
+
+        // pass the node to the infix
+        infix.setNode(this.content);
+
+        // if the right tree exists
+        if (infix.hasRightTree()) {
+
+            // set the right tree to the tree instance created of
+            // the information of the right tree's infix
+            this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + 1, this.yPos + 1, this.nodeMap);
+        }
+
+        // if the left tree exists
+        if (infix.hasLeftTree()) {
+
+            // set the left tree to the tree instance createf of
+            // the information of the left tree's infix
+            this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, this.nodeMap);
+        }
+    }
+
     // This tree constructor takes in two parameter, an infix representation (to
     // determine the left and right subtrees)
     // and one other representation to determine the root
@@ -36,7 +91,7 @@ public class Tree {
         this.rep = rep;
 
         // initialize the hashmap with the needed capacity
-        nodeMap = new HashMap<String, Tree>(rep.getContent().length);
+        this.nodeMap = new HashMap<String, Tree>(rep.getContent().length);
 
         // get the root of the tree
         this.content = rep.getNode(infix);
@@ -363,7 +418,6 @@ public class Tree {
         Pattern termsPattern = Pattern.compile("\\([0-9]+[\\+\\-\\/\\*][0-9]+\\)");
         Matcher matcher = termsPattern.matcher(expression);
 
-
         // replace the expressions untill only the solutions is left
         // -> while the expression isn't like (<number>)
         while (!expression.matches("[0-9]+")) {
@@ -422,5 +476,34 @@ public class Tree {
             }
         }
         return -1;
+    }
+
+    // gather all information about the tree and
+    // return a formatted result
+    // ->
+    // <drawn tree>
+    // <tree in infix>
+    // <tree in postfix>
+    // <tree in prefix>
+    // <result if tree is mathematical>
+    public String informationToString() {
+        // create a string builder with the size of 1024
+        // to store the result
+        StringBuilder builder = new StringBuilder(1024);
+
+        // write the tree as string to the builder
+        builder.append(this.toString() + "\n");
+
+        // write the representations to the builder
+        builder.append("infix = " + this.toInfix(false) + "\n");
+        builder.append("postfix = " + this.toPostfix() + "\n");
+        builder.append("prefix = " + this.toPrefix() + "\n");
+
+        // if the tree is a mathematical expression
+        if (this.isMathExpression()) {
+            builder.append(this.toInfix(true) + " = " + this.calculate());
+        }
+
+        return builder.toString();
     }
 }

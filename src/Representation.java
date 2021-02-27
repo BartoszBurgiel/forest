@@ -58,20 +58,12 @@ public class Representation {
         // split the representation string by the commata and assemble the content
         this.content = representation.split(",");
 
-        // search for duplicates within the content
-        // create a hashmap for the elements
-        HashMap<String, Boolean> contentHashMap = new HashMap<String, Boolean>(this.content.length);
-        for (String s : content) {
-
-            // check if the element exists in the map
-            if (contentHashMap.containsKey(s)) {
-                throw new Exception("No duplicates allowed within a representation: " + s + " occurs at least twice.");
-            }
-            contentHashMap.put(s, true);
+        try {
+            // check if there are any duplicates
+            findDuplicatesInContent(content);
+        } catch (Exception e) {
+            System.out.println(e.toString());
         }
-
-        // clear the map
-        contentHashMap.clear();
 
         // determine the node (if possible)
         // if POSTFIX -> last char
@@ -86,6 +78,69 @@ public class Representation {
 
         // collect the tree information from the content
         this.setNode(this.node);
+    }
+
+    // generate a representation with the contents of the contents string in a
+    // randomized order of the given type
+    public static String generateRandomRepresentation(String type, String[] content) throws Exception {
+        try {
+            // check if there are any duplicates
+            findDuplicatesInContent(content);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // creare a copy of the content
+        // so that the original content doesn't get affected by the future element
+        // deletion
+        String[] tempContent = content.clone();
+
+        // create a string builder for the representation string
+        // with the size of 256
+        StringBuilder builder = new StringBuilder(256);
+
+        // check if the type is legal
+        if (!type.matches("(pos|pre|inf)")) {
+            throw new Exception("False type representation for the randomized representation.");
+        }
+
+        // write the type of the representation into the builder
+        builder.append(type + "=");
+
+        // iterate over the content and build the representation string
+        // in a random order
+
+        // elementsAppended tells how many elements from the content
+        // were appended to the representation
+        // -> if elementsAppended == content.length -> all elements are in the
+        // representation
+        int elementsAppended = 0;
+        int index = 0;
+        // append the elements of the content to the representation
+        while (elementsAppended != tempContent.length) {
+
+            // get the index of the element to append
+            index = (int) (Math.random() * (double) (tempContent.length));
+
+            // check if the tempContent[index] != null
+            if (tempContent[index] != null) {
+
+                // append the element with a seperating comma
+                builder.append(tempContent[index] + ",");
+
+                // set the element to null to not add the element again
+                tempContent[index] = null;
+
+                // increase the elementsAppended
+                elementsAppended++;
+            }
+
+        }
+
+        // trim the last character
+        // -> last character is a comma
+        builder.deleteCharAt(builder.length() - 1);
+        return builder.toString();
     }
 
     // private representation constructor for the assembly of subtrees
@@ -351,5 +406,20 @@ public class Representation {
 
     public void setRightTree(String[] rightTree) {
         this.rightTree = rightTree;
+    }
+
+    // helper functions
+    static private void findDuplicatesInContent(String[] content) throws Exception {
+        // search for duplicates within the content
+        // create a hashmap for the elements
+        HashMap<String, Boolean> contentHashMap = new HashMap<String, Boolean>(content.length);
+        for (String s : content) {
+
+            // check if the element exists in the map
+            if (contentHashMap.containsKey(s)) {
+                throw new Exception("No duplicates allowed within a representation: " + s + " occurs at least twice.");
+            }
+            contentHashMap.put(s, true);
+        }
     }
 }
