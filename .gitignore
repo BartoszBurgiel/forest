@@ -1,8 +1,13 @@
 # compiled binaries 
 bin
 
-# own todo list 
-todo
-
 # testing files
-./src/*Test.java
+src/ReprTest.java
+src/TreeTest.java
+
+# compiled jar file 
+*.jar 
+
+# scripts
+build
+test

@@ -9,7 +9,12 @@ public class Playground {
     // memory to store the tree variables
     // key = the name of the variable
     // value = the tree
-    private HashMap<String, Tree> memory;
+    private HashMap<String, Tree> treeMemory;
+
+    // memory to store the representation variables
+    // key = name of the variable
+    // value = the representation
+    private HashMap<String, Representation> representationMemory;
 
     // valid inputs stores the regex to describe a valid inputs into the
     // plauground
@@ -30,7 +35,7 @@ public class Playground {
     public Playground() {
 
         // initialize the memory map
-        this.memory = new HashMap<String, Tree>();
+        this.treeMemory = new HashMap<String, Tree>();
 
         // initialize the valid input regex
         this.validInputs = new HashMap<PlaygroundExpression, String>();
@@ -47,6 +52,10 @@ public class Playground {
         // regular tree declaration
         this.validInputs.put(PlaygroundExpression.NEW_TREE,
                 "([a-zA-Z0-9]+)=(newTree\\((\\((inf)=[a-zA-Z0-9\\+\\-\\/\\*]+(,[a-zA-Z0-9\\+\\-\\/\\*]+)+\\))),(\\((pre|pos)=[a-zA-Z0-9\\+\\-\\/\\*]+(,[a-zA-Z0-9\\+\\-\\/\\*]+)+\\))\\)$");
+
+        // new representation declaration
+        this.validInputs.put(PlaygroundExpression.NEW_REPRESENTATION,
+                "rep\\(([a-zA-Z0-9]+)\\)=((inf|pos|pre)=[a-zA-Z0-9\\+\\-\\/\\*]+(,[a-zA-Z0-9\\+\\-\\/\\*]+)+$)");
 
         // tree method
         this.validInputs.put(PlaygroundExpression.TREE_METHOD,
@@ -119,6 +128,10 @@ public class Playground {
                     break;
                 case NEW_RANDOM_TREE:
                     this.handleNewRandomTree(input);
+                    break;
+                case NEW_REPRESENTATION:
+                    this.handleNewRepresentation(input);
+                    break;
                 default:
                     break;
             }
@@ -170,7 +183,7 @@ public class Playground {
             }
 
             // put the variable into the memory
-            this.memory.put(variableName, t);
+            this.treeMemory.put(variableName, t);
 
             System.out.println("Successfully created and added a new tree to the memory");
         }
@@ -238,7 +251,7 @@ public class Playground {
         }
 
         // add t and the variable to the memory
-        this.memory.put(variableName, t);
+        this.treeMemory.put(variableName, t);
 
         System.out.println("Successfully created and added a new tree to the memory");
     }
@@ -258,12 +271,12 @@ public class Playground {
             String treeName = matcher.group(1);
 
             // check if the name exists
-            if (!this.memory.containsKey(treeName)) {
+            if (!this.treeMemory.containsKey(treeName)) {
                 System.out.println("The tree with the name " + treeName + " is undefined");
                 return;
             }
 
-            Tree t = this.memory.get(treeName);
+            Tree t = this.treeMemory.get(treeName);
 
             // get the method
             String method = matcher.group(2);
@@ -279,12 +292,18 @@ public class Playground {
                     return;
 
                 case "explain()":
-                    System.out.println("Under construction...");
+                    System.out.println(t.getExplanation());
                     return;
                 default:
                     break;
             }
         }
+
+    }
+
+    // handle the declaration of a new representation
+    // -> extract the information via the regex and write it to the memory
+    private void handleNewRepresentation(String input) {
 
     }
 
