@@ -3,3 +3,6 @@ bin
 
 # own todo list 
 todo
+
+# testing files
+./src/*Test.java

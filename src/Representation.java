@@ -185,9 +185,9 @@ public class Representation {
             rightTreeString = String.format("(%s)", String.join(", ", this.rightTree));
         }
 
-        if (this.node != "") {
-            nodeString = String.format("[%s]", this.node);
-        }
+        // if (this.node != "") {
+        // nodeString = String.format("[%s]", this.node);
+        // }
 
         // maximal one tree can be undefined because the
         // node can be at the very end or the very beginning of the content
@@ -219,20 +219,20 @@ public class Representation {
             // define the format
             String format = "%s, ";
 
+            // // if at the node
+            // if (this.content[i].equals(this.node)) {
+            // format = "[%s], ";
+
+            // // if the type is POSTFIX, set another format
+            // // -> the last element is the node
+            // if (this.type == RepresentationType.POSTFIX) {
+            // format = "[%s]";
+            // }
+            // }
+
             // if on last element
             if (i == this.content.length - 1) {
-                format = "%s";
-            }
-
-            // if at the node
-            if (this.content[i].equals(this.node)) {
-                format = "[%s], ";
-
-                // if the type is POSTFIX, set another format
-                // -> the last element is the node
-                if (this.type == RepresentationType.POSTFIX) {
-                    format = "[%s]";
-                }
+                format = format.replaceAll(",\\ ", "");
             }
 
             out += String.format(format, this.content[i]);
@@ -380,6 +380,30 @@ public class Representation {
     // any elements in it
     public boolean isEmpty() {
         return (this.content.length == 0);
+    }
+
+    // tell the kind of the representation
+    public boolean isInfix() {
+        return this.type == RepresentationType.INFIX;
+    }
+
+    public boolean isPostfix() {
+        return this.type == RepresentationType.POSTFIX;
+    }
+
+    public boolean isPrefix() {
+        return this.type == RepresentationType.PREFIX;
+    }
+
+    // get the type of the representation as a string
+    public String typeToString() {
+        if (this.isInfix()) {
+            return "infix";
+        }
+        if (this.isPostfix()) {
+            return "postfix";
+        }
+        return "prefix";
     }
 
     // setter

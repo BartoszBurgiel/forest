@@ -226,8 +226,16 @@ public class Playground {
             return;
         }
 
+        Tree t = null;
+
         // construct the tree with the representations
-        Tree t = new Tree(infix, rep);
+        try {
+            t = new Tree(infix, rep);
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return;
+        }
 
         // add t and the variable to the memory
         this.memory.put(variableName, t);

@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,6 +22,13 @@ public class Tree {
     // key -> the content of the node
     // value -> the tree reference
     private HashMap<String, Tree> nodeMap;
+
+    // buffer to store the step-by-step explanation to
+    // create the tree from the two representations
+    private StringBuilder explanationBuffer;
+
+    // copy of the value of the explanation Buffer
+    private String explanation = "";
 
     // the original infix and rep representations
     // for the funture tree expansion when turining to a string
@@ -53,32 +61,72 @@ public class Tree {
 
         // pass the node to the infix
         infix.setNode(this.content);
+        this.infix.setNode(this.content);
+
+        // initialize the explaination buffer and write the initial message
+        this.initializeExplanationBuffer();
 
         // if the right tree exists
         if (infix.hasRightTree()) {
+            if (this.explanation == "") {
+
+                this.explanationBuffer
+                        .append("\n\n== Now we go in the right subtree (" + infix.getRightTreeString() + ")==\n\n");
+            }
 
             // set the right tree to the tree instance created of
             // the information of the right tree's infix
-            this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + 1, this.yPos + 1, this.nodeMap);
+            this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + 1, this.yPos + 1, this.nodeMap, false,
+                    this.explanationBuffer);
         }
 
         // if the left tree exists
         if (infix.hasLeftTree()) {
+            if (this.explanation == "") {
+
+                this.explanationBuffer
+                        .append("\n\n== Now we go in the left subtree (" + infix.getLeftTreeString() + ")==\n\n");
+            }
 
             // set the left tree to the tree instance createf of
             // the information of the left tree's infix
-            this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, this.nodeMap);
+            this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, this.nodeMap, true,
+                    this.explanationBuffer);
         }
+
+        // set the explanation to the value fo the buffer
+        this.explanation = this.explanationBuffer.toString();
+
+        // clear the buffer
+        this.explanationBuffer.setLength(0);
     }
 
     // This tree constructor takes in two parameter, an infix representation (to
     // determine the left and right subtrees)
     // and one other representation to determine the root
-    public Tree(Representation infix, Representation rep) {
+    public Tree(Representation infix, Representation rep) throws Exception {
 
         // set the infix and rep
         this.infix = infix;
         this.rep = rep;
+
+        // if the number of the elements in the representations isn't equal
+        if (this.infix.getContent().length != this.rep.getContent().length) {
+            throw new Exception("Both representations must contain the same amount of elements.");
+        }
+
+        // check if both representations contain the same elements
+        // iterate over the infix and check if
+        // rep contains every element of the infix
+        for (int i = 0; i < this.infix.getContent().length; i++) {
+
+            // convert the rep's content to array to use the contains function
+            if (!Arrays.asList(this.rep.getContent()).contains(this.infix.getContent()[i])) {
+
+                // if there exists an element that is in infix and not in rep
+                throw new Exception("Both representations must contain the same elements");
+            }
+        }
 
         // initialize the hashmap with the needed capacity
         this.nodeMap = new HashMap<String, Tree>(rep.getContent().length);
@@ -95,29 +143,54 @@ public class Tree {
 
         // pass the node to the infix
         infix.setNode(this.content);
+        this.infix.setNode(this.content);
 
+        // initialize the explanation buffer and write the initial message
+        this.initializeExplanationBuffer();
         // if the right tree exists
         if (infix.hasRightTree()) {
 
+            if (this.explanation == "") {
+
+                this.explanationBuffer
+                        .append("\n\n== Now we go in the right subtree (" + infix.getRightTreeString() + ")==\n\n");
+            }
+
             // set the right tree to the tree instance created of
             // the information of the right tree's infix
-            this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + 1, this.yPos + 1, this.nodeMap);
+            this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + 1, this.yPos + 1, this.nodeMap, false,
+                    this.explanationBuffer);
         }
 
         // if the left tree exists
         if (infix.hasLeftTree()) {
 
+            if (this.explanation == "") {
+
+                this.explanationBuffer
+                        .append("\n\n== Now we go in the left subtree (" + infix.getLeftTreeString() + ")==\n\n");
+            }
+
             // set the left tree to the tree instance createf of
             // the information of the left tree's infix
-            this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, this.nodeMap);
+            this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, this.nodeMap, true,
+                    this.explanationBuffer);
         }
+        // set the explanation to the value fo the buffer
+        this.explanation = this.explanationBuffer.toString();
+
+        // clear the buffer
+        this.explanationBuffer.setLength(0);
     }
 
     // private constructor for the recursive subtree generation
     // with the x and y coordinates
-    private Tree(Representation infix, Representation rep, int x, int y, HashMap<String, Tree> nodeMap) {
+    private Tree(Representation infix, Representation rep, int x, int y, HashMap<String, Tree> nodeMap,
+            boolean isLeftTree, StringBuilder explanationBuffer) {
+
         // get the root of the tree
         this.content = rep.getNode(infix);
+        this.addExplanationStep(explanationBuffer, this.content, infix, rep, "\t".repeat(y));
 
         // set the coordinates
         this.xPos = x;
@@ -128,18 +201,31 @@ public class Tree {
 
         // if the right tree exists
         if (infix.hasRightTree()) {
+            if (this.explanation == "") {
+
+                explanationBuffer.append("\n\n" + "\t".repeat(y) + "== Now we go in the right subtree ("
+                        + infix.getRightTreeString() + ")==\n\n");
+            }
 
             // set the right tree to the tree instance created of
             // the information of the right tree's infix
-            this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + 1, this.yPos + 1, nodeMap);
+            this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + 1, this.yPos + 1, nodeMap, false,
+                    explanationBuffer);
         }
 
         // if the left tree exists
         if (infix.hasLeftTree()) {
 
+            if (this.explanation == "") {
+
+                explanationBuffer.append("\n\n" + "\t".repeat(y) + "== Now we go in the left subtree ("
+                        + infix.getLeftTreeString() + ")==\n\n");
+            }
+
             // set the left tree to the tree instance createf of
             // the information of the left tree's infix
-            this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, nodeMap);
+            this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - 1, this.yPos + 1, nodeMap, true,
+                    explanationBuffer);
         }
 
         // put the node into the map
@@ -148,18 +234,28 @@ public class Tree {
 
     public String toString() {
 
+        // reset the explanation buffer
+        this.explanationBuffer = new StringBuilder(1024 * 2);
+        this.initializeExplanationBuffer();
+
         // check for duplicate positions
         // and while the duplicates exist, rebuild the tree
         // increasing the spead on the initial left and right trees
+        //
+        // if there exist duplicates still after two iterations
+        // -> stop trying, the result will only be a incomplete tree
+        // image
         int spread = 1;
-        while (this.hasDuplicateCoordinates()) {
+        while (this.hasDuplicateCoordinates() && spread < 3) {
+
             spread++;
             // if the right tree exists
             if (infix.hasRightTree()) {
 
                 // set the right tree to the tree instance created of
                 // the information of the right tree's infix
-                this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + spread, this.yPos + 1, this.nodeMap);
+                this.rightTree = new Tree(infix.getRightTree(), rep, this.xPos + spread, this.yPos + 1, this.nodeMap,
+                        false, this.explanationBuffer);
             }
 
             // if the left tree exists
@@ -167,7 +263,8 @@ public class Tree {
 
                 // set the left tree to the tree instance createf of
                 // the information of the left tree's infix
-                this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - spread, this.yPos + 1, this.nodeMap);
+                this.leftTree = new Tree(infix.getLeftTree(), rep, this.xPos - spread, this.yPos + 1, this.nodeMap,
+                        true, this.explanationBuffer);
             }
         }
 
@@ -495,5 +592,63 @@ public class Tree {
         }
 
         return builder.toString();
+    }
+
+    // initialize the explanation string and write the initial message
+    private void initializeExplanationBuffer() {
+
+        // initialize the explanaiton buffer with the initial capacity of 1024*2
+        this.explanationBuffer = new StringBuilder(1024 * 2);
+
+        // check if the explanation has already been created
+        if (this.explanation != "") {
+            return;
+        }
+
+        // write the initial message to the explain buffer
+        this.explanationBuffer.append("The original representations are defined as follows:\n");
+        this.explanationBuffer.append("(1) " + this.rep.toString() + "\n");
+        this.explanationBuffer.append("(2) " + this.infix.toString() + "\n\n");
+        this.explanationBuffer.append(
+                "The first representation tells us where the root of each subtree is. \nIt's the element of the infix representation, which is the leftmost in the prefix, and the rightmost in the postfix. In this case it's the '"
+                        + this.rep.getNode() + "'.\n");
+
+        this.explanationBuffer.append(
+                "The second representation tells us where to find the left and right subtree if we know the root of our tree.\n\n");
+        this.explanationBuffer
+                .append("In our case, since the root is the '" + this.content + "', we know that both subtrees are:\n");
+        this.explanationBuffer.append("Left subtree: " + this.infix.getLeftTreeString() + "\n");
+        this.explanationBuffer.append("Right subtree: " + this.infix.getRightTreeString() + "\n\n");
+
+    }
+
+    // add one step to the explanation buffer
+    // -> register the current state
+    private void addExplanationStep(StringBuilder explanationBuffer, String root, Representation infix,
+            Representation rep, String indent) {
+        // check if the explanation has already been created
+        if (this.explanation != "") {
+            return;
+        }
+        explanationBuffer.append(indent + "The infix notation for this subtree equals:\n");
+        explanationBuffer.append(indent + infix.toString() + "\n\n");
+        explanationBuffer.append(
+                indent + "With the help of the other representation, we can determine the root of this subtree.\n");
+        explanationBuffer.append(
+                indent + infix.toString() + " -> " + rep.toString() + "\n" + indent + " -> root: " + root + "\n\n");
+        infix.setNode(root);
+
+        explanationBuffer
+                .append(indent + "Based on the root '" + root + "' we can determine the left and right subtree\n");
+        explanationBuffer.append(indent + "Left subtree: "
+                + (infix.hasLeftTree() ? infix.getLeftTreeString() : "subtree doesn't exist") + "\n");
+        explanationBuffer.append(indent + "Right subtree: "
+                + (infix.hasRightTree() ? infix.getRightTreeString() : "subtree doesn't exist") + "\n\n");
+
+    }
+
+    // return the explanation string assembled during the tree construction
+    public String getExplanation() {
+        return this.explanation;
     }
 }

@@ -27,7 +27,7 @@ public class TreeTest {
         // and the toString conversion
         private long duration, toStringDuration;
 
-        public Testcase(String infixRepr, String rep, String title) {
+        public Testcase(String infixRepr, String rep, String title) throws Exception {
 
             // set the title of the test
             this.title = title;
@@ -111,7 +111,7 @@ public class TreeTest {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         Testcase test1 = new Testcase("inf=6,5,9,7,2,4,1,8,3", "pos=5,7,9,6,1,4,2,3,8", "test1");
         test1.setIsMathExpression(false);
@@ -209,13 +209,11 @@ public class TreeTest {
 
         Tree t = new Tree(infixRepr, rep);
         System.out.println(t.informationToString());
+        System.out.println("WAS IST LOST ALTER");
 
-        System.out.println("\n\nRandom tree");
-        try {
-            t = new Tree(new String[] { "ab", "bc", "cd", "ded", "eew", "ffs", "gwe" });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.out.println(t.informationToString());
+        System.out.println("Tree explanation:");
+        t = new Tree(new String[] { "a", "b", "c", "d", "e", "f" });
+        System.out.println(t.toString());
+        System.out.println(t.getExplanation());
     }
 }
