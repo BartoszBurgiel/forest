@@ -110,6 +110,16 @@ public class Tree {
         this.infix = infix;
         this.rep = rep;
 
+        // check if the first representations is an infix
+        if (!this.infix.isInfix()) {
+            throw new Exception("The first representation of a tree must be an infix");
+        }
+
+        // check if the second representation is either postfix or prefix
+        if (!(this.rep.isPrefix() || this.rep.isPostfix())) {
+            throw new Exception("The second representation of a tree must be either a prefix or a postfix");
+        }
+
         // if the number of the elements in the representations isn't equal
         if (this.infix.getContent().length != this.rep.getContent().length) {
             throw new Exception("Both representations must contain the same amount of elements.");

@@ -209,7 +209,6 @@ public class TreeTest {
 
         Tree t = new Tree(infixRepr, rep);
         System.out.println(t.informationToString());
-        System.out.println("WAS IST LOST ALTER");
 
         System.out.println("Tree explanation:");
         t = new Tree(new String[] { "a", "b", "c", "d", "e", "f" });

@@ -36,6 +36,7 @@ public class Playground {
 
         // initialize the memory map
         this.treeMemory = new HashMap<String, Tree>();
+        this.representationMemory = new HashMap<String, Representation>();
 
         // initialize the valid input regex
         this.validInputs = new HashMap<PlaygroundExpression, String>();
@@ -51,7 +52,7 @@ public class Playground {
 
         // regular tree declaration
         this.validInputs.put(PlaygroundExpression.NEW_TREE,
-                "([a-zA-Z0-9]+)=(newTree\\((\\((inf)=[a-zA-Z0-9\\+\\-\\/\\*]+(,[a-zA-Z0-9\\+\\-\\/\\*]+)+\\))),(\\((pre|pos)=[a-zA-Z0-9\\+\\-\\/\\*]+(,[a-zA-Z0-9\\+\\-\\/\\*]+)+\\))\\)$");
+                "([a-zA-Z0-9]+)=(newTree\\(((\\((inf)=[a-zA-Z0-9\\+\\-\\/\\*]+(,[a-zA-Z0-9\\+\\-\\/\\*]+)+\\))|(rep\\([a-zA-Z0-9]+\\))),((\\((pre|pos)=[a-zA-Z0-9\\+\\-\\/\\*]+(,[a-zA-Z0-9\\+\\-\\/\\*]+)+\\))|(rep\\([a-zA-Z0-9]+\\))))\\)");
 
         // new representation declaration
         this.validInputs.put(PlaygroundExpression.NEW_REPRESENTATION,
@@ -94,7 +95,8 @@ public class Playground {
 
             // check if the input couldn't be recognized
             if (expression == PlaygroundExpression.UNKNOWN_EXPRESSION) {
-                System.out.println("unknown expression");
+                System.out.println(
+                        "invalid expression. maybe forgot a bracket? or accidentally used an illegal character?\n");
                 continue;
             }
 
@@ -214,29 +216,73 @@ public class Playground {
             // the groups 3 and 6 are other representation groups
             // -> determine which is an infix representation and
             // assign and remove the brackets
-            infixString = matcher.group(3).replaceAll("\\(|\\)", "");
-            repString = matcher.group(6).replaceAll("\\(|\\)", "");
+            infixString = matcher.group(3);
+            repString = matcher.group(8);
         }
 
         // create the Representations from the information
         Representation infix = null;
         Representation rep = null;
 
-        // try to create both representations
-        // -> if there's anything wrong with the passed notation
-        // -> return
-        try {
-            infix = new Representation(infixString);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return;
+        // check if the infix representation strings
+        // are new defined representations or called variables
+
+        // check the infix representation
+        if (infixString.matches("rep\\([a-zA-Z0-9]+\\)")) {
+
+            // extract the variable name
+            infixString = infixString.replaceAll("rep\\(|\\)", "");
+
+            // check if the variable is defined
+            if (!this.representationMemory.containsKey(infixString)) {
+                System.out.println("The representation " + infixString + " is not defined.");
+                return;
+            }
+
+            // get the representation from the memory and set it to the infix
+            infix = this.representationMemory.get(infixString);
+            System.out.println(infix.toString());
+        } else if (infixString.matches("\\(((inf)=[a-zA-Z0-9\\+\\-\\/\\*]+(,[a-zA-Z0-9\\+\\-\\/\\*]+)+)\\)")) {
+
+            // remove all brackets
+            infixString = infixString.replaceAll("\\(|\\)", "");
+
+            // create a new representation and set it to the infix
+            try {
+                infix = new Representation(infixString);
+
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                return;
+            }
         }
 
-        try {
-            rep = new Representation(repString);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return;
+        // check the other representation
+        if (repString.matches("rep\\([a-zA-Z0-9]+\\)")) {
+
+            // extract the variable name
+            repString = repString.replaceAll("rep\\(", "").replaceAll("\\)", "");
+
+            // check if the variable is defined
+            if (!this.representationMemory.containsKey(repString)) {
+                System.out.println("The representation " + repString + " is not defined.");
+                return;
+            }
+
+            // get the representation from the memory and set it to the infix
+            rep = this.representationMemory.get(repString);
+        } else if (repString.matches("\\(((pos|pre)=[a-zA-Z0-9\\+\\-\\/\\*]+(,[a-zA-Z0-9\\+\\-\\/\\*]+)+)\\)")) {
+
+            repString = repString.replaceAll("\\(|\\)", "");
+
+            // create a new representation and set it to the infix
+            try {
+                rep = new Representation(repString);
+
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                return;
+            }
         }
 
         Tree t = null;
@@ -305,6 +351,33 @@ public class Playground {
     // -> extract the information via the regex and write it to the memory
     private void handleNewRepresentation(String input) {
 
+        // create a matcher to extract the data from the input
+        Pattern termsPattern = Pattern.compile(this.validInputs.get(PlaygroundExpression.NEW_REPRESENTATION));
+        Matcher matcher = termsPattern.matcher(input);
+
+        // if the matcher found a match
+        if (matcher.find()) {
+
+            // the first subgroup is the variable name
+            String variableName = matcher.group(1);
+
+            // the second subgroup is the representation
+            String representationString = matcher.group(2);
+
+            // construct the representation
+            Representation rep = null;
+            try {
+                rep = new Representation(representationString);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                return;
+            }
+
+            // put the representation to the memory
+            this.representationMemory.put(variableName, rep);
+            System.out.println(variableName);
+            System.out.println("Successfully added a new representation to the memory");
+        }
     }
 
 }
