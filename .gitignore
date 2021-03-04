@@ -11,3 +11,5 @@ src/TreeTest.java
 # scripts
 build
 test
+src/TreeTest.java
+src/ReprTest.java
